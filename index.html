@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wintermute: multi-agent swarms for the GitHub Copilot app</title>
+  <meta name="description" content="Wintermute is a plugin for the GitHub Copilot app that plans and runs substantial work as a crew of agent sessions, with cross-vendor review, independent claims checks and a swarm dashboard.">
+  <meta name="theme-color" content="#0d0e11">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preload" href="assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/space-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/dash.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/dash.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-ne" viewBox="0 0 16 16"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></symbol>
+    <symbol id="i-down" viewBox="0 0 16 16"><path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></symbol>
+    <symbol id="i-right" viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></symbol>
+    <symbol id="i-star" viewBox="0 0 16 16"><path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="currentColor"/></symbol>
+    <symbol id="i-code" viewBox="0 0 16 16"><path d="M5.5 4 1.5 8l4 4M10.5 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2.5v7M8 12v1.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-term" viewBox="0 0 16 16"><path d="M2.5 3.5h11v9h-11z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5 7 8.5 5 10.5M8.5 10.5H11" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="i-flow" viewBox="0 0 16 16"><path d="M5.5 2.5h5v3h-5zM1.5 10.5h4v3h-4zM10.5 10.5h4v3h-4zM8 5.5V8M3.5 10.5V8h9v2.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 16 16"><path d="M2 2.5h12v11H2zM2 6.5h12M2 10h12M7 2.5v11" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 16 16"><path d="M1.5 8.5h3l2-5 3 9 2-4h3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#top" aria-label="Wintermute, back to top">
+        <img class="brand__mark" src="assets/img/mark.svg" alt="" width="32" height="32">
+        <span class="brand__name">Wintermute</span>
+      </a>
+      <nav class="topnav" aria-label="Documentation">
+        <a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/QUICKSTART.md">Quick start</a>
+        <a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/DASHBOARD.md">Dashboard</a>
+        <a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/ncksol/ai_tools/tree/main/ghcp/plugins/wintermute">GitHub<svg class="ico" aria-hidden="true"><use href="#i-ne"/></svg></a>
+      </nav>
+      <div class="topbar__actions">
+        <div class="chip-cmd"><span class="chip-cmd__prompt" aria-hidden="true">&gt;</span><code>copilot plugin install wintermute@ai-tools</code></div>
+        <a class="btn-star" href="https://github.com/ncksol/ai_tools"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-star"/></svg><span>Star</span></a>
+        <a class="btn-icon" href="https://github.com/ncksol/ai_tools/tree/main/ghcp/plugins/wintermute" aria-label="Wintermute on GitHub"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- 01. HERO -->
+    <section class="section hero" id="top">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <div class="hero__text">
+            <p class="eyebrow"><span class="sq" aria-hidden="true"></span>// Multi-agent swarms for the GitHub Copilot app</p>
+            <h1 class="display">You didn't sign up to babysit five AI chat tabs.</h1>
+            <p class="lead">Wintermute is a plugin for the GitHub Copilot app that plans and runs substantial work as a crew of agent sessions: research, specs, code, investigations and documents. You describe the goal once. It splits the work across child sessions, picks a model for each job, runs independent parts in parallel, and has another session check the work before it counts as done.</p>
+          </div>
+          <div class="hero__ctas">
+            <a class="btn btn--primary" href="https://github.com/ncksol/ai_tools/tree/main/ghcp/plugins/wintermute"><svg class="ico ico--mobile" aria-hidden="true"><use href="#i-term"/></svg><span>Read the plugin docs</span><svg class="ico ico--desk" aria-hidden="true"><use href="#i-ne"/></svg></a>
+            <a class="btn btn--ghost" href="#how"><span>See how it works</span><svg class="ico" aria-hidden="true"><use href="#i-down"/></svg></a>
+          </div>
+        </div>
+
+        <section class="term" aria-label="Install">
+          <div class="term__bar">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="term__title">Quick start // install</span>
+          </div>
+          <div class="term__body">
+            <div class="step">
+              <p class="step__label"># 1. Add the marketplace</p>
+              <div class="cmd">
+                <div class="cmd__text"><span class="cmd__prompt" aria-hidden="true">$</span><code>copilot plugin marketplace add ncksol/ai_tools</code></div>
+                <button class="copy" type="button" data-copy="copilot plugin marketplace add ncksol/ai_tools">Copy</button>
+              </div>
+            </div>
+            <div class="step">
+              <p class="step__label"># 2. Install the plugin</p>
+              <div class="cmd">
+                <div class="cmd__text"><span class="cmd__prompt" aria-hidden="true">$</span><code class="hl">copilot plugin install wintermute@ai-tools</code></div>
+                <button class="copy" type="button" data-copy="copilot plugin install wintermute@ai-tools">Copy</button>
+              </div>
+            </div>
+            <div class="step">
+              <p class="step__label"># 3. Start a session</p>
+              <p class="step__note">Restart the Copilot app, start a new session, and pick <code>wintermute-core</code> as its agent from the <strong>+</strong> menu or with <code>/agent</code>. Then describe the work.</p>
+            </div>
+          </div>
+          <div class="term__foot">
+            <span>Agent ID: wintermute:wintermute-core</span>
+            <span class="hl">Runs in the Copilot app</span>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 02. HOW A SWARM RUNS -->
+    <section class="section" id="how">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <p class="tag">[02 // How it works]</p>
+            <h2 class="h2">How a swarm runs</h2>
+          </div>
+          <p class="sec-head__aside">You describe the goal once. The orchestrator plans the units, starts a child session for each, and brings you only the decisions that need you.</p>
+        </div>
+
+        <div class="blueprint">
+          <div class="node-root">
+            <div class="node-root__head">
+              <span class="badge badge--solid">Orchestrator</span>
+              <code class="hl">wintermute:wintermute-core</code>
+            </div>
+            <div class="node-root__body">
+              <div>
+                <h3 class="h3">Plans, delegates and tracks</h3>
+                <p class="meta">A top-level session on a strong model at a high reasoning level. Sets the model and effort of every child from its tier table.</p>
+              </div>
+              <div class="policy">
+                <span class="policy__k">Policy:</span>
+                <span class="policy__v">Plan for wall-clock speed</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="connector" aria-hidden="true">
+            <svg class="ico ico--lg"><use href="#i-down"/></svg>
+            <span class="connector__label">Starts child sessions · independent units in parallel</span>
+            <svg class="ico ico--lg"><use href="#i-down"/></svg>
+          </div>
+
+          <div class="streams">
+            <article class="stream">
+              <div class="stream__top">
+                <div class="stream__head"><span>Unit A · investigation</span><code class="hl">wintermute-peon</code></div>
+                <h3 class="h3">Find the cause first</h3>
+                <p class="body-sm">Separate hypotheses go to separate one-off sessions. Nobody starts a fix until there is evidence of the cause.</p>
+              </div>
+              <div class="stream__foot"><span>Tier: Mid or High</span><span class="strong">One-off session</span></div>
+            </article>
+            <article class="stream">
+              <div class="stream__top">
+                <div class="stream__head"><span>Unit B · code</span><code class="hl">wintermute-peon</code></div>
+                <h3 class="h3">One PR-sized unit</h3>
+                <p class="body-sm">Owns its branch and PR. A unit that builds on another is stacked on its parent's branch, so it can start as soon as the parent has pushed.</p>
+              </div>
+              <div class="stream__foot"><span>Tier: Mid, High if critical</span><span class="strong">Owner · branch + PR</span></div>
+            </article>
+            <article class="stream">
+              <div class="stream__top">
+                <div class="stream__head"><span>Unit C · document</span><code class="hl">wintermute-peon</code></div>
+                <h3 class="h3">Spec, ADR or research brief</h3>
+                <p class="body-sm">A drafter writes it and a fact-checker from another vendor checks its facts and sources.</p>
+              </div>
+              <div class="stream__foot"><span>Tier: Document draft</span><span class="strong">Owner · document</span></div>
+            </article>
+          </div>
+
+          <div class="connector connector--single" aria-hidden="true">
+            <svg class="ico ico--lg"><use href="#i-down"/></svg>
+          </div>
+
+          <div class="gate">
+            <div class="gate__head">
+              <div class="gate__title">
+                <span class="badge badge--alert">Required</span>
+                <h3 class="h3 h3--caps">Independent checks before work counts as done</h3>
+              </div>
+              <span class="gate__cond">[Before every merge]</span>
+            </div>
+            <div class="gate__stages">
+              <div class="stage">
+                <div class="stage__head"><span class="hl strong">Stage 01: Cross-vendor review</span><span>Never the author's vendor</span></div>
+                <p class="stage__title">A reviewer from another vendor</p>
+                <p class="body-sm">Code written by Opus or Sonnet goes to Astra; code written by Astra or Sol goes to Opus. Units marked critical, such as ones that touch security, money or schemas, get a critical review instead.</p>
+                <p class="stage__tick"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-check"/></svg>Reports every finding, not a selection</p>
+              </div>
+              <div class="stage">
+                <div class="stage__head"><span class="hl strong">Stage 02: Claims check</span><span>Separate read-only session</span></div>
+                <p class="stage__title">The author's report is not the proof</p>
+                <p class="body-sm">A separate session checks, at the pushed commit, that the tests ran (with test counts), that CI is green and that the scope matches the brief.</p>
+                <p class="stage__tick"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-check"/></svg>A check, not a review</p>
+              </div>
+            </div>
+            <div class="gate__notes">
+              <p><span class="strong">Go-aheads:</span> before a PR is opened, taken out of draft or merged, the orchestrator asks you, unless you told it to decide.</p>
+              <p><span class="strong">Documents:</span> every load-bearing document gets a drafter and a fact-checker from different vendors.</p>
+            </div>
+            <div class="gate__outcome">
+              <div class="gate__outcome-l"><span class="sq" aria-hidden="true"></span><span class="strong caps">Final panel: two judges from two vendors</span></div>
+              <span class="muted">They check the last PR before it merges</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. COMPARISON -->
+    <section class="section" id="compare">
+      <div class="wrap">
+        <div class="sec-head sec-head--stack">
+          <p class="tag">[03 // Comparison]</p>
+          <h2 class="h2">One session, <code class="h2__code">/orchestrate</code> and Wintermute</h2>
+          <p class="sec-head__lead">The app's built-in <code>/orchestrate</code> already runs child sessions in parallel and stacks PRs; use it when you want to set the workflow yourself. Wintermute packages model choice, independent review and verification into a preset workflow, with a dashboard to follow the whole job. For code work, the difference looks like this:</p>
+        </div>
+
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">One session</th>
+                <th scope="col">Built-in /orchestrate</th>
+                <th scope="col" class="matrix__us">Wintermute</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Who does the work</th>
+                <td data-label="One session">One main session, which can use sub-agents</td>
+                <td data-label="Built-in /orchestrate">Child sessions in parallel, with stacked PRs</td>
+                <td data-label="Wintermute" class="matrix__us">Child sessions in parallel, with stacked PRs</td>
+              </tr>
+              <tr>
+                <th scope="row">Model and effort</th>
+                <td data-label="One session">The session's model, or Copilot Fusion's pick per step</td>
+                <td data-label="Built-in /orchestrate">No fixed tier policy; defaults or your instructions</td>
+                <td data-label="Wintermute" class="matrix__us">Set for every child session from the agent's tier table</td>
+              </tr>
+              <tr>
+                <th scope="row">Review</th>
+                <td data-label="One session">On demand, or automatically with rubber duck (when enabled) or Fusion</td>
+                <td data-label="Built-in /orchestrate">No prescribed per-PR review gate; automatic critique is still available</td>
+                <td data-label="Wintermute" class="matrix__us matrix__us--hl">A model from another vendor, before every merge</td>
+              </tr>
+              <tr>
+                <th scope="row">Proof that the tests ran</th>
+                <td data-label="One session">The session's own report</td>
+                <td data-label="Built-in /orchestrate">No prescribed independent test or CI verification</td>
+                <td data-label="Wintermute" class="matrix__us">A separate session checks tests, CI and scope at the pushed commit</td>
+              </tr>
+              <tr>
+                <th scope="row">Final check</th>
+                <td data-label="One session">No prescribed two-judge merge panel</td>
+                <td data-label="Built-in /orchestrate">No prescribed two-judge merge panel</td>
+                <td data-label="Wintermute" class="matrix__us matrix__us--hl">Two judges from two vendors check the last PR</td>
+              </tr>
+              <tr>
+                <th scope="row">Following the work</th>
+                <td data-label="One session">The transcript</td>
+                <td data-label="Built-in /orchestrate">The app's project Overview</td>
+                <td data-label="Wintermute" class="matrix__us">The Overview, plus a dashboard with progress, cost, stuck work and what needs you</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="footnote">Trade-offs: for a small, self-contained task, one session is usually simpler. Even a one-PR swarm adds a review, a claims check and a two-judge panel, which add model calls and cost. Cross-vendor review needs at least two vendors; the default policy uses Anthropic, OpenAI and Google. The checks make independent review happen, but they don't guarantee correct code.</p>
+      </div>
+    </section>
+
+    <!-- 04. DASHBOARD -->
+    <section class="section" id="dashboard">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <p class="tag">[04 // Swarm dashboard]</p>
+            <h2 class="h2">Follow the whole swarm in one view</h2>
+          </div>
+          <p class="sec-head__aside">Watch-only · <span class="hl">reads Copilot's local data read-only</span> · 127.0.0.1:7927</p>
+        </div>
+
+        <figure class="console">
+          <div class="console__bar">
+            <div class="console__title"><span class="dot dot--pulse" aria-hidden="true"></span><span>Wintermute // swarm dashboard</span></div>
+            <span class="console__tag">Sample data</span>
+          </div>
+          <div class="wd" role="img" aria-label="Sample swarm dashboard in the Cards view. The orchestrator, Sample story B, is waiting on a question: publish PR #421 for review? Units: 2 working, 2 stuck, 2 waiting on you, 1 blocked, 1 idle and 4 finished. Swarm cost about $977.">
+            <div class="d-head">
+              <div class="d-id">
+                <span class="mark st-question"><svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc" cx="20" cy="20" r="17"/><g class="g"><path class="g-line" d="M16.3 16.4a3.8 3.8 0 1 1 5.6 3.4c-1.2.6-1.9 1.3-1.9 2.6v.6"/><circle cx="20" cy="27.3" r="1.8"/></g></svg></span>
+                <div class="o-who st-question">
+                  <div class="o-l1"><span class="d-name">Sample story B</span><span class="o-role">Orchestrator · sample-project</span></div>
+                  <div class="o-state">Waiting on question · <span data-s="1600" data-f="short">26m</span></div>
+                  <div class="o-now">Publish PR #421 for review?</div>
+                </div>
+              </div>
+              <div class="d-facts">
+                <div class="kv"><span class="k">Running</span><span class="v"><span data-s="256420" data-f="clock">2d 23h 13m 40s</span></span></div>
+                <div class="kv"><span class="k">Swarm cost</span><span class="v">≈$977</span></div>
+              </div>
+              <div class="d-counts">
+                <div class="tile st-busy"><span class="v">2</span><span class="k"><span class="dot"></span>working</span></div>
+                <div class="tile st-stuck"><span class="v">2</span><span class="k"><span class="dot"></span>stuck</span></div>
+                <div class="tile st-question"><span class="v">2</span><span class="k"><span class="dot"></span>waiting on you</span></div>
+                <div class="tile st-blocked"><span class="v">1</span><span class="k"><span class="dot"></span>blocked</span></div>
+                <div class="tile st-idle"><span class="v">1</span><span class="k"><span class="dot"></span>idle</span></div>
+                <div class="tile st-merged"><span class="v">4</span><span class="k"><span class="dot"></span>finished</span></div>
+              </div>
+            </div>
+            <div class="d-body">
+              <div class="d-main">
+                <div class="tabs"><span class="tab is-on">Cards</span><span class="tab tab--narrow">Activity</span><span class="tab">Timeline</span><span class="tab">Plan</span><span class="tab">Board</span></div>
+                <div class="b-zone">
+                  <div class="b-grid">
+                    <div class="b-card st-stuck">
+                      <div class="b-head">
+                        <span class="mark st-stuck"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc stuck" cx="20" cy="20" r="17"/><g class="g"><rect x="18.4" y="11.5" width="3.2" height="10" rx="1.6"/><circle cx="20" cy="27" r="1.9"/></g></svg></span>
+                        <div class="b-who st-stuck">
+                          <div class="b-l1"><span class="b-lab">I1</span><span class="b-name">integration</span></div>
+                          <div class="b-l2"><span class="b-st">Stuck · tool call <span data-s="2980" data-f="short">49m</span></span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">Run the end-to-end contract tests</div>
+                      <div class="b-foot">
+                        <div class="b-left"><span class="b-prog"><span class="bar"><i class="p56"></i></span>5/9</span></div>
+                        <div class="b-right"><span class="b-model">Sonnet 5 · medium</span><span class="b-cost">≈$97</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-stuck">
+                      <div class="b-head">
+                        <span class="mark st-stuck"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc stuck" cx="20" cy="20" r="17"/><g class="g"><rect x="18.4" y="11.5" width="3.2" height="10" rx="1.6"/><circle cx="20" cy="27" r="1.9"/></g></svg></span>
+                        <div class="b-who st-stuck">
+                          <div class="b-l1"><span class="b-lab">table-research</span><span class="b-name">DataGrid or a new table</span></div>
+                          <div class="b-l2"><span class="b-st">Stuck · silent <span data-s="1000" data-f="short">16m</span></span><span class="b-tag">research</span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">Compared DataGrid with two lighter table libraries so far.<span class="b-ago"> · <span data-s="1300" data-f="age">21m ago</span></span></div>
+                      <div class="b-foot">
+                        <div class="b-left"></div>
+                        <div class="b-right"><span class="b-model">Sonnet 5 · medium</span><span class="b-cost">≈$1.02</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-plan">
+                      <div class="b-head">
+                        <span class="mark st-plan"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc" cx="20" cy="20" r="17"/><g class="g"><path class="g-line" d="M14.5 15h11M14.5 20h11M14.5 25h7"/></g></svg></span>
+                        <div class="b-who st-plan">
+                          <div class="b-l1"><span class="b-lab">B2</span><span class="b-name">import</span><span class="b-warn"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5 15.2 14.3H.8zM7.2 5.6h1.6v4.6H7.2zM8 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z"/></svg></span></div>
+                          <div class="b-l2"><span class="b-st">Waiting on plan · <span data-s="2380" data-f="short">39m</span></span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">Step 2 plan: 4 tasks to add XLSX import.</div>
+                      <div class="b-foot">
+                        <div class="b-left"><span class="b-prog"><span class="bar"><i class="p30"></i></span>3/10</span></div>
+                        <div class="b-right"><span class="b-model">Sonnet 5 · medium</span><span class="b-cost">≈$58</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-blocked">
+                      <div class="b-head">
+                        <span class="mark st-blocked"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc" cx="20" cy="20" r="17"/><g class="g"><rect x="15.5" y="14" width="3.4" height="12" rx="1.2"/><rect x="21.1" y="14" width="3.4" height="12" rx="1.2"/></g></svg></span>
+                        <div class="b-who st-blocked">
+                          <div class="b-l1"><span class="b-lab">F1</span><span class="b-name">UI</span></div>
+                          <div class="b-l2"><span class="b-st">Blocked on orchestrator · <span data-s="820" data-f="short">13m</span></span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">The results page needs a table: reuse DataGrid, or build a lighter table.<span class="b-ago"> · <span data-s="820" data-f="age">13m ago</span></span></div>
+                      <div class="b-foot">
+                        <div class="b-left"><span class="b-prog"><span class="bar"><i class="p40"></i></span>4/10</span></div>
+                        <div class="b-right"><span class="b-model">Sonnet 5 · high</span><span class="b-cost">≈$83</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-busy">
+                      <div class="b-head">
+                        <span class="mark st-busy"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc spin" cx="20" cy="20" r="17" stroke-dasharray="29.9 106.8"/><g class="g g-dots"><circle cx="14" cy="20" r="2.2"/><circle cx="20" cy="20" r="2.2"/><circle cx="26" cy="20" r="2.2"/></g></svg></span>
+                        <div class="b-who st-busy">
+                          <div class="b-l1"><span class="b-lab">B1</span><span class="b-name">API</span></div>
+                          <div class="b-l2"><span class="b-st">Busy · <span data-s="2200" data-f="short">36m</span></span><span class="b-pr">PR #418 · in review</span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">Page the order list by cursor</div>
+                      <div class="b-foot">
+                        <div class="b-left"><span class="chip st-busy" data-chip><span class="dot"></span><span class="chip-t">code-review <span data-s="460" data-f="short">7m</span></span></span><span class="b-more" hidden></span><span class="chip b-count st-busy" hidden><span class="dot"></span><span class="chip-t">1</span></span><span class="b-prog"><span class="bar"><i class="p70"></i></span>7/10</span></div>
+                        <div class="b-right"><span class="b-model">Sonnet 5 · xhigh</span><span class="b-cost">≈$240</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-busy">
+                      <div class="b-head">
+                        <span class="mark st-busy"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc spin" cx="20" cy="20" r="17" stroke-dasharray="29.9 106.8"/><g class="g g-dots"><circle cx="14" cy="20" r="2.2"/><circle cx="20" cy="20" r="2.2"/><circle cx="26" cy="20" r="2.2"/></g></svg></span>
+                        <div class="b-who st-busy">
+                          <div class="b-l1"><span class="b-lab">map-import-module</span><span class="b-name">Map the import module</span></div>
+                          <div class="b-l2"><span class="b-st">Busy · <span data-s="340" data-f="short">5m</span></span><span class="b-tag">explore</span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">Find who calls the import service</div>
+                      <div class="b-foot">
+                        <div class="b-left"></div>
+                        <div class="b-right"><span class="b-model">GPT-5.4 Mini · low</span><span class="b-cost">≈$0.51</span></div>
+                      </div>
+                    </div>
+                    <div class="b-card st-idle">
+                      <div class="b-head">
+                        <span class="mark st-idle"><svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="17"/><circle class="arc" cx="20" cy="20" r="17"/><g class="g"><path d="M23.2 13.2a7 7 0 1 0 4.6 11.2 6 6 0 0 1-4.6-11.2z"/></g></svg></span>
+                        <div class="b-who st-idle">
+                          <div class="b-l1"><span class="b-lab">D5</span><span class="b-name">docs</span></div>
+                          <div class="b-l2"><span class="b-st">Idle · <span data-s="640" data-f="short">10m</span></span><span class="b-pr">PR #421 · draft</span></div>
+                        </div>
+                      </div>
+                      <div class="b-now">PR #421 is ready; publishing it needs approval.<span class="b-ago"> · <span data-s="18100" data-f="age">5h ago</span></span></div>
+                      <div class="b-foot">
+                        <span class="b-need"><span>PR to approve</span><span hidden>Approve</span></span>
+                        <div class="b-left"><span class="b-prog"><span class="bar"><i class="p90"></i></span>9/10</span></div>
+                        <div class="b-right"><span class="b-model">Haiku 5.5</span><span class="b-cost">≈$31</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="b-fin-h"><svg class="b-caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5z"/></svg><span class="b-fin-t">Finished</span><span class="b-fin-n">4</span><span class="b-fin-s">stopped, merged, done and failed · latest first</span></div>
+                  <p class="cards-note">Archived and hidden sessions are on the Board tab.</p>
+                </div>
+              </div>
+              <div class="d-side">
+                <div class="rail">
+                  <div class="sec-h"><span class="rail-h">Activity</span><span class="small muted">all units, latest first</span></div>
+                  <ol class="feed2">
+                    <li class="fi"><span class="fi-t"><span data-s="340" data-f="age">5m ago</span></span><span><span class="fi-u">map-import-module</span> started explore</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="460" data-f="age">7m ago</span></span><span><span class="fi-u">B1</span> started code-review: review-pr-418</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="640" data-f="age">10m ago</span></span><span><span class="fi-u">D5</span> PR monitor check</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="820" data-f="age">13m ago</span></span><span><span class="fi-u">F1</span> reported needs input: The results page needs a table: reuse DataGrid, or build a lighter table.</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="1600" data-f="age">26m ago</span></span><span><span class="fi-u">SB</span> asked: Publish PR #421 for review?</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="2200" data-f="age">36m ago</span></span><span><span class="fi-u">table-research</span> started research</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="2380" data-f="age">39m ago</span></span><span><span class="fi-u">B2</span> sent a plan for approval</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="2560" data-f="age">42m ago</span></span><span><span class="fi-u">B2</span> reported complete: The parser is done. The plan for step 2 is waiting for approval.</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="2620" data-f="age">43m ago</span></span><span><span class="fi-u">B1</span> PR monitor check</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="7540" data-f="age">2h ago</span></span><span><span class="fi-u">B1</span> reported needs input: PR #418 is open with 14 endpoints. Should list endpoints page by cursor or by offset?</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="221380" data-f="age">2d 13h ago</span></span><span><span class="fi-u">scan-docs-links</span> cancelled rubber-duck</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="222100" data-f="age">2d 13h ago</span></span><span><span class="fi-u">scan-docs-links</span> started rubber-duck</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="226600" data-f="age">2d 14h ago</span></span><span><span class="fi-u">migrate-fixtures</span> failed task</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="227500" data-f="age">2d 15h ago</span></span><span><span class="fi-u">migrate-fixtures</span> started task</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="253300" data-f="age">2d 22h ago</span></span><span><span class="fi-u">audit-schema-usage</span> completed general-purpose</span></li>
+                    <li class="fi"><span class="fi-t"><span data-s="254500" data-f="age">2d 22h ago</span></span><span><span class="fi-u">audit-schema-usage</span> started general-purpose</span></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption class="console__foot">
+            <span>Opens in the Copilot app's side panel when the orchestrator starts its first child session.</span>
+            <span>In a browser: run <code class="hl">npm start</code> in <code>~/.copilot/installed-plugins/ai-tools/wintermute</code>, then open <code>http://127.0.0.1:7927/</code>. <code class="hl">npm start -- --demo</code> shows sample data. Needs Node.js 18 or later and a SQLite reader; see the <a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/QUICKSTART.md">quick start</a>.</span>
+          </figcaption>
+        </figure>
+
+        <div class="features">
+          <div class="feature">
+            <p class="feature__k"><svg class="ico ico--warn" aria-hidden="true"><use href="#i-alert"/></svg>Needs you</p>
+            <p class="body-sm">Questions, plans and PRs to approve show on their unit's card and in the header. You answer in the sessions; the dashboard only shows you where to look.</p>
+          </div>
+          <div class="feature">
+            <p class="feature__k"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-pulse"/></svg>Stuck work</p>
+            <p class="body-sm">Flags a session that has gone quiet past its limit, keeps failing tool calls or repeats the same call. The detail panel names the rule that fired.</p>
+          </div>
+          <div class="feature">
+            <p class="feature__k"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-flow"/></svg>Timeline, Plan, Board</p>
+            <p class="body-sm">Each session's busy and idle time, the units as a graph of stacked branches, and columns from Planned to Finished.</p>
+          </div>
+          <div class="feature">
+            <p class="feature__k"><svg class="ico ico--primary" aria-hidden="true"><use href="#i-grid"/></svg>Cost and History</p>
+            <p class="body-sm">Cost per session and for the swarm, in dollars at list price. Finished runs keep a summary of time and cost by unit and model.</p>
+          </div>
+        </div>
+        <p class="footnote">Privacy: the dashboard reads <code>~/.copilot/data.db</code> and the session folders and never writes to them. The server listens on 127.0.0.1 only, and its only outbound requests are read-only <code>gh</code> and <code>az</code> queries about the swarm's pull requests. <a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/DASHBOARD.md">Read the dashboard guide</a>.</p>
+      </div>
+    </section>
+
+    <!-- 05. CALL TO ACTION -->
+    <section class="section section--last" id="install">
+      <div class="wrap">
+        <div class="cta">
+          <p class="eyebrow"><span class="sq" aria-hidden="true"></span>// Get started</p>
+          <h2 class="h2 cta__title">Describe the goal once. Command the swarm.</h2>
+          <p class="lead">Wintermute installs as one Copilot plugin, with no npm dependencies. Run the orchestrator in the GitHub Copilot app; the dashboard canvas runs on the Node.js that ships with Copilot.</p>
+          <div class="cta__row">
+            <div class="cmd cmd--cta">
+              <div class="cmd__text"><code class="hl">copilot plugin install wintermute@ai-tools</code></div>
+              <button class="copy" type="button" data-copy="copilot plugin install wintermute@ai-tools">Copy</button>
+            </div>
+            <a class="btn btn--primary" href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/QUICKSTART.md"><svg class="ico ico--mobile" aria-hidden="true"><use href="#i-term"/></svg><span>Read the quick start</span><svg class="ico ico--desk" aria-hidden="true"><use href="#i-right"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <div class="brand">
+          <img class="brand__mark" src="assets/img/mark.svg" alt="" width="32" height="32">
+          <span class="brand__name hl">Wintermute</span>
+        </div>
+        <p class="footer__tagline">One mind. Many agents. Command the swarm.</p>
+        <p class="footer__badge">Plugin for the GitHub Copilot app</p>
+      </div>
+      <div>
+        <p class="footer__k">// What's inside</p>
+        <ul class="footer__list">
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/com.github.copilot/agents/wintermute-core.agent.md">The <code>wintermute-core</code> orchestrator</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/com.github.copilot/agents/wintermute-peon.agent.md">The <code>wintermute-peon</code> child agent</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/DASHBOARD.md">The swarm dashboard</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/tree/main/ghcp/plugins/wintermute/skills/wintermute-pr-commands">Tested PR commands for GitHub and Azure DevOps</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__k">// Links &amp; docs</p>
+        <ul class="footer__list">
+          <li><a href="https://github.com/ncksol/ai_tools">GitHub repository</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/tree/main/ghcp/plugins/wintermute">Plugin folder (ghcp/plugins/wintermute)</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/QUICKSTART.md">Quick start</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/CHANGELOG.md">Changelog</a></li>
+          <li><a href="https://github.com/ncksol/ai_tools/blob/main/ghcp/plugins/wintermute/LICENSE">MIT License</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="tabbar" aria-label="Sections">
+    <a href="#top"><svg class="ico" aria-hidden="true"><use href="#i-term"/></svg><span>Install</span></a>
+    <a href="#how"><svg class="ico" aria-hidden="true"><use href="#i-flow"/></svg><span>How</span></a>
+    <a href="#compare"><svg class="ico" aria-hidden="true"><use href="#i-grid"/></svg><span>Compare</span></a>
+    <a href="#dashboard"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg><span>Dashboard</span></a>
+  </nav>
+</body>
+</html>

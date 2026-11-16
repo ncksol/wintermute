@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="44 40 160 160" width="160" height="160" role="img" aria-label="Wintermute">
+  <!-- Mark and blueprint grid copied from ghcp/plugins/wintermute/docs/images/banner-dark.svg (same coordinates and colours). -->
+  <g fill="none">
+    <g stroke="#6cb2ec" stroke-width="1" stroke-opacity="0.18">
+      <path d="M58 42v156M102 42v156M146 42v156M190 42v156M46 54h156M46 98h156M46 142h156M46 186h156"/>
+      <rect x="52" y="48" width="144" height="144" rx="16" stroke-dasharray="3 3"/>
+    </g>
+    <path d="M54 54h8M58 50v8M54 186h8M58 182v8M186 54h8M190 50v8M186 186h8M190 182v8" stroke="#6cb2ec" stroke-width="1.25" stroke-opacity="0.40"/>
+    <path d="M 103.8 170.1 A 54 54 0 0 1 103.8 69.9" stroke="#8ec5ec" stroke-width="6.5" stroke-linecap="round"/>
+    <path d="M 144.2 69.9 A 54 54 0 0 1 144.2 170.1" stroke="#58cfc2" stroke-width="6.5" stroke-linecap="round"/>
+    <polygon points="120,90 100,99 90,120 100,141 120,150" fill="#183247" fill-opacity="0.80" stroke="#8ec5ec" stroke-width="2.1" stroke-linejoin="round"/>
+    <polygon points="128,90 148,99 158,120 148,141 128,150" fill="#0e4138" fill-opacity="0.80" stroke="#58cfc2" stroke-width="2.1" stroke-linejoin="round"/>
+    <line x1="124" y1="62" x2="124" y2="178" stroke="#66d7ca" stroke-width="1.5" stroke-dasharray="3 3" stroke-opacity="0.7"/>
+    <polygon points="124,105.5 138.5,120 124,134.5 109.5,120" fill="#0e4138" stroke="#66d7ca" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="124" cy="120" r="5.5" fill="#78d9ce"/>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 56 128 128" width="128" height="128" role="img" aria-label="Wintermute">
+  <!-- Dark plate for contrast; the mark is copied unchanged from banner-dark.svg. -->
+  <rect x="61" y="57" width="126" height="126" rx="22" fill="#0d1117" stroke="#2d3540" stroke-width="2"/>
+  <g fill="none">
+    <path d="M 103.8 170.1 A 54 54 0 0 1 103.8 69.9" stroke="#8ec5ec" stroke-width="6.5" stroke-linecap="round"/>
+    <path d="M 144.2 69.9 A 54 54 0 0 1 144.2 170.1" stroke="#58cfc2" stroke-width="6.5" stroke-linecap="round"/>
+    <polygon points="120,90 100,99 90,120 100,141 120,150" fill="#183247" fill-opacity="0.80" stroke="#8ec5ec" stroke-width="2.1" stroke-linejoin="round"/>
+    <polygon points="128,90 148,99 158,120 148,141 128,150" fill="#0e4138" fill-opacity="0.80" stroke="#58cfc2" stroke-width="2.1" stroke-linejoin="round"/>
+    <line x1="124" y1="62" x2="124" y2="178" stroke="#66d7ca" stroke-width="1.5" stroke-dasharray="3 3" stroke-opacity="0.7"/>
+    <polygon points="124,105.5 138.5,120 124,134.5 109.5,120" fill="#0e4138" stroke="#66d7ca" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="124" cy="120" r="5.5" fill="#78d9ce"/>
+  </g>
+</svg>

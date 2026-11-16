@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="64 60 120 120" width="120" height="120" role="img" aria-label="Wintermute">
+  <!-- Mark copied from ghcp/plugins/wintermute/docs/images/banner-dark.svg (same coordinates and colours). -->
+  <g fill="none">
+    <path d="M 103.8 170.1 A 54 54 0 0 1 103.8 69.9" stroke="#8ec5ec" stroke-width="6.5" stroke-linecap="round"/>
+    <path d="M 144.2 69.9 A 54 54 0 0 1 144.2 170.1" stroke="#58cfc2" stroke-width="6.5" stroke-linecap="round"/>
+    <polygon points="120,90 100,99 90,120 100,141 120,150" fill="#183247" fill-opacity="0.80" stroke="#8ec5ec" stroke-width="2.1" stroke-linejoin="round"/>
+    <polygon points="128,90 148,99 158,120 148,141 128,150" fill="#0e4138" fill-opacity="0.80" stroke="#58cfc2" stroke-width="2.1" stroke-linejoin="round"/>
+    <line x1="124" y1="62" x2="124" y2="178" stroke="#66d7ca" stroke-width="1.5" stroke-dasharray="3 3" stroke-opacity="0.7"/>
+    <polygon points="124,105.5 138.5,120 124,134.5 109.5,120" fill="#0e4138" stroke="#66d7ca" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="124" cy="120" r="5.5" fill="#78d9ce"/>
+  </g>
+</svg>
